@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday, My Love</title>
+    
+    <!-- Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Great+Vibes&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Lato', sans-serif;
+            background: linear-gradient(to bottom, #fff0f5, #ffe4e1, #ffd1dc);
+            overflow-x: hidden;
+            cursor: none; 
+            user-select: none;
+        }
+
+        .font-typewriter { font-family: 'Courier Prime', monospace; }
+        .font-handwriting { font-family: 'Great Vibes', cursive; }
+
+        /* Custom Heart Cursor */
+        #custom-cursor {
+            position: fixed;
+            top: 0; left: 0;
+            width: 32px; height: 32px;
+            pointer-events: none;
+            z-index: 10000;
+            transform: translate(-50%, -50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #be185d;
+            font-size: 26px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
+        }
+        
+        .cursor-trail {
+            position: fixed;
+            pointer-events: none;
+            background: #fda4af;
+            border-radius: 50%;
+            z-index: 9999;
+        }
+
+        /* Wind Chime Logic - Sharper Graphics */
+        .chime-container {
+            position: fixed;
+            top: -10px; left: 8vw; 
+            z-index: 50;
+            transform-origin: top center;
+        }
+        
+        .chime-top {
+            width: 100px; height: 12px;
+            background: #991b1b; 
+            border-radius: 50%;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            position: relative;
+        }
+        
+        .chime-string {
+            position: absolute;
+            width: 1.5px;
+            background: rgba(0,0,0,0.25);
+            transform-origin: top center;
+        }
+        
+        .chime-tube {
+            position: absolute;
+            width: 10px;
+            background: linear-gradient(90deg, #f8fafc, #64748b, #f8fafc);
+            border-radius: 0 0 4px 4px;
+            box-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+        }
+
+        .chime-heart {
+            color: #ef4444; 
+            position: absolute;
+            left: -12px; 
+            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.15));
+            transition: transform 0.1s ease;
+        }
+
+        /* Refined 3D Flip Book */
+        .scene {
+            width: 320px; height: 420px;
+            perspective: 2500px;
+            margin: 0 auto;
+        }
+        
+        .book-container {
+            width: 100%; height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+        }
+        
+        .page {
+            position: absolute;
+            width: 100%; height: 100%;
+            top: 0; left: 0;
+            transform-origin: top;
+            transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            background: white;
+            border-radius: 0 0 15px 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+            border: 1px solid #ffe4e6;
+            backface-visibility: hidden; 
+            z-index: 1;
+            padding: 24px;
+        }
+
+        .page.flipped {
+            transform: rotateX(-165deg);
+            pointer-events: none;
+        }
+
+        .spiral-coil {
+            width: 100%; height: 40px;
+            background: repeating-linear-gradient(90deg, #94a3b8 0px, #94a3b8 6px, transparent 6px, transparent 18px);
+            position: absolute;
+            top: -20px; left: 0;
+            z-index: 100;
+            border-radius: 6px;
+        }
+
+        /* Playlist UI - Minimizable */
+        #music-container {
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        #music-container.minimized #music-panel {
+            transform: scale(0.4) translate(150px, 150px);
+            opacity: 0;
+            pointer-events: none;
+        }
+        #music-container.minimized #music-toggle-btn {
+            background: #be185d;
+            color: white;
+            border-radius: 50%;
+            width: 60px; height: 60px;
+        }
+
+        /* Timeline Box */
+        .timeline-photo-box {
+            aspect-ratio: 1/1;
+            background: #fff;
+            padding: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            transform: rotate(-3deg);
+            transition: transform 0.5s ease;
+        }
+        .timeline-photo-box:hover { transform: rotate(0deg) scale(1.05); }
+
+        /* Floating Animation */
+        @keyframes heartFloat {
+            0% { transform: translateY(0) translateX(0); }
+            33% { transform: translateY(-5px) translateX(5px); }
+            66% { transform: translateY(-10px) translateX(-5px); }
+            100% { transform: translateY(0) translateX(0); }
+        }
+        .heart-float { animation: heartFloat 3s ease-in-out infinite; }
+
+        /* Hide Scrollbar */
+        ::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div id="custom-cursor"><i class="fas fa-heart"></i></div>
+
+    <!-- Minimizable Playlist Sidebar -->
+    <div id="music-container" class="fixed bottom-6 right-6 lg:top-10 lg:bottom-auto lg:right-10 z-[200] flex flex-col items-end">
+        <div id="music-panel" class="bg-white/95 backdrop-blur-xl rounded-[2rem] shadow-2xl border border-pink-100 w-72 p-6 mb-4 origin-bottom-right transition-all duration-500">
+            <div class="flex items-center justify-between mb-5">
+                <div class="flex flex-col">
+                    <h4 class="font-typewriter text-[10px] uppercase tracking-[0.3em] text-rose-500 font-bold mb-1">Playlist</h4>
+                    <span id="current-song-name" class="font-handwriting text-xl text-gray-700 truncate w-40 italic">Perfect</span>
+                </div>
+                <button id="minimize-btn" class="text-gray-300 hover:text-rose-400 transition-colors p-2">
+                    <i class="fas fa-compress-alt"></i>
+                </button>
+            </div>
+            
+            <div id="song-list" class="space-y-2 mb-6 max-h-52 overflow-y-auto pr-2 custom-scroll">
+                <!-- Song items injected by JS -->
+            </div>
+
+            <div class="flex items-center justify-between bg-rose-50/50 rounded-2xl p-4">
+                <button id="prev-btn" class="text-rose-300 hover:text-rose-600 p-2"><i class="fas fa-backward"></i></button>
+                <button id="play-btn" class="w-14 h-14 rounded-full bg-rose-500 text-white flex items-center justify-center shadow-lg hover:scale-110 transition-transform active:scale-95">
+                    <i class="fas fa-play text-xl ml-1" id="play-icon"></i>
+                </button>
+                <button id="next-btn" class="text-rose-300 hover:text-rose-600 p-2"><i class="fas fa-forward"></i></button>
+            </div>
+        </div>
+
+        <!-- Floating Toggle Button (Visible when minimized) -->
+        <button id="music-toggle-btn" class="flex items-center justify-center bg-white/80 shadow-xl border border-pink-100 p-4 rounded-full hover:scale-110 transition-all text-rose-500">
+            <i class="fas fa-music text-xl" id="toggle-icon"></i>
+        </button>
+
+        <audio id="bg-music" loop>
+            <source id="audio-source" src="" type="audio/mp3">
+        </audio>
+    </div>
+
+    <!-- Sharper Wind Chime -->
+    <div class="chime-container" id="wind-chime">
+        <div class="chime-top relative flex justify-center"></div>
+    </div>
+
+    <div class="relative z-10 w-full max-w-md mx-auto min-h-screen pb-32 md:max-w-2xl lg:max-w-4xl">
+        
+        <!-- Hero -->
+        <section class="h-screen flex flex-col justify-center items-center text-center px-8 relative">
+            <div class="mb-10 opacity-0" id="hero-date">
+                <span class="inline-block px-6 py-2 rounded-full border border-rose-200 bg-white/50 text-rose-800 text-[10px] tracking-[0.4em] uppercase font-bold shadow-sm">
+                    My Puchhu
+                </span>
+            </div>
+            
+            <h1 class="text-5xl md:text-7xl font-typewriter text-gray-800 mb-8 leading-tight min-h-[160px] flex items-center justify-center px-4">
+                <span id="typewriter-text"></span><span class="animate-pulse text-rose-500">|</span>
+            </h1>
+            
+            <p class="text-4xl md:text-6xl font-handwriting text-rose-600 transform rotate-[-3deg] opacity-0" id="hero-sub">
+                To the girl who defines my happiness
+            </p>
+
+            <div class="absolute bottom-12 animate-bounce text-rose-200">
+                <i class="fas fa-chevron-down text-3xl"></i>
+            </div>
+        </section>
+
+        <!-- Where it all started -->
+        <section class="py-32 px-8" id="origin-section">
+            <div class="text-center mb-24">
+                <h2 class="font-handwriting text-7xl text-rose-600">Where it all started...</h2>
+                <p class="font-typewriter text-[10px] text-rose-300 mt-6 tracking-[0.5em] uppercase font-bold italic">A Journey of Soulmates</p>
+            </div>
+            
+            <div class="relative space-y-32">
+                <div class="absolute left-4 md:left-1/2 top-0 bottom-0 w-px bg-rose-200 -translate-x-1/2 opacity-50"></div>
+                
+                <div class="relative flex flex-col md:flex-row items-center gap-12 opacity-0 origin-card">
+                    <div class="md:w-1/2 flex flex-col items-end text-right">
+                        <div class="timeline-photo-box w-72 mb-6">
+                            <img src="pics/A.jpg" class="w-full h-full object-cover rounded shadow-inner" alt="Placeholder 1">
+                        </div>
+                        <span class="font-typewriter text-rose-400 font-bold uppercase text-[10px] tracking-widest">The Beginning</span>
+                        <h4 class="font-typewriter text-2xl text-gray-800 mt-2">The Moment of Impact</h4>
+                    </div>
+                    <div class="w-5 h-5 rounded-full bg-rose-500 z-10 border-4 border-white shadow-md"></div>
+                    <div class="md:w-1/2 bg-white/80 p-10 rounded-[2.5rem] border border-white shadow-2xl">
+                        <p class="text-gray-600 italic leading-relaxed text-lg font-serif">"I remember the exact moment. The air felt different. I saw you, and for the first time in my life, I wasn't just existing—I was noticing. Your presence changed everything."</p>
+                    </div>
+                </div>
+
+                <div class="relative flex flex-col md:flex-row-reverse items-center gap-12 opacity-0 origin-card">
+                    <div class="md:w-1/2 flex flex-col items-start text-left">
+                        <div class="timeline-photo-box w-72 mb-6 transform rotate-4">
+                            <img src="pics/B.jpg" class="w-full h-full object-cover rounded shadow-inner" alt="Placeholder 2">
+                        </div>
+                        <span class="font-typewriter text-rose-400 font-bold uppercase text-[10px] tracking-widest">Our Connection</span>
+                        <h4 class="font-typewriter text-2xl text-gray-800 mt-2">Endless Conversation</h4>
+                    </div>
+                    <div class="w-5 h-5 rounded-full bg-rose-500 z-10 border-4 border-white shadow-md"></div>
+                    <div class="md:w-1/2 bg-white/80 p-10 rounded-[2.5rem] border border-white shadow-2xl">
+                        <p class="text-gray-600 italic leading-relaxed text-lg font-serif">"We talked all day and through the night. That's when I realized your company was something I never wanted to lose."</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Smart-Scatter Gallery -->
+        <section class="py-32 px-6 min-h-screen">
+            <div class="text-center mb-24">
+                <h2 class="font-handwriting text-6xl text-gray-700">Your Shining Moments</h2>
+                <p class="font-typewriter text-[10px] text-rose-400 mt-6 uppercase tracking-[0.5em] font-bold">Double tap to ❤️ • Save to keep</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-20 w-full max-w-4xl mx-auto" id="gallery-grid"></div>
+        </section>
+
+        <!-- 3D Calendar -->
+        <section class="py-32 px-6 flex flex-col items-center justify-center bg-white/40 rounded-[4rem] mx-4 my-20 border border-white shadow-inner">
+            <div class="text-center mb-20">
+                <h2 class="font-handwriting text-7xl text-rose-600 mb-6">Our Future Together</h2>
+                <p class="font-typewriter text-xs text-gray-400 tracking-[0.2em] uppercase">Click the top to flip the month</p>
+            </div>
+
+            <div class="scene">
+                <div class="spiral-coil"></div>
+                <div class="book-container" id="flipbook"></div>
+            </div>
+
+            <button id="reset-book" class="mt-20 px-10 py-4 bg-white text-rose-500 rounded-full shadow-2xl border border-rose-100 hover:bg-rose-50 font-typewriter text-xs uppercase tracking-widest transition-all opacity-0 pointer-events-none active:scale-95">
+                <i class="fas fa-history mr-2"></i>Reset to January
+            </button>
+        </section>
+
+        <!-- Final Message -->
+        <section class="h-screen flex flex-col justify-center items-center text-center px-10">
+            <div class="max-w-3xl">
+                <p class="font-typewriter text-2xl md:text-4xl text-gray-700 leading-relaxed mb-20" id="closing-text"></p>
+                <div class="opacity-0 scale-75" id="signature-block">
+                    <h3 class="font-handwriting text-8xl md:text-9xl text-rose-600 transform -rotate-3 leading-none drop-shadow-lg">
+                        Forever Yours,<br>Ishan
+                    </h3>
+                    <div class="mt-16 text-rose-300">
+                        <i class="fas fa-heart text-4xl animate-ping"></i>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        // --- Music Configuration ---
+        const playlist = [
+            { title: "Mere bina", url: "https://www.youtube.com/watch?v=XvUSsh3gdO4&list=RDXvUSsh3gdO4&start_radio=1" },
+            { title: "For a reason", url: "https://www.youtube.com/watch?v=-YlmnPh-6rE&list=RD-YlmnPh-6rE&start_radio=1" },
+            { title: "All of Me", url: "https://www.youtube.com/watch?v=450p7goxZqg&list=RD450p7goxZqg&start_radio=1" },
+            { title: "Khwaab Ho Tum", url: "https://www.youtube.com/watch?v=Jw4wLVnFJ-E&list=RDJw4wLVnFJ-E&start_radio=1" }
+        ];
+
+        // --- Data ---
+        const galleryImages = [
+            { url: "pics/opp.jpg", caption: "Sweetest Soul" },
+            { url: "pics/000.jpg", caption: "In Your Eyes" },
+            { url: "pics/poo.jpg", caption: "Forever Us" },
+            { url: "pics/smile2.jpg", caption: "That Smile" }
+        ];
+
+        const calendarData = [
+            { month: "January", msg: "A fresh start, forever together.", img: "pics/Snapchat-1925593733.jpg" },
+            { month: "February", msg: "Love is our daily language.", img: "pics/Snapchat-1834176685.jpg" },
+            { month: "March", msg: "Blooming into our best selves.", img: "pics/march.jpg" },
+            { month: "April", msg: "Cozy nights and warm hugs.", img: "pics/Snapchat-805851910.jpg" },
+            { month: "May", msg: "Brighter sun, deeper love.", img: "pics/Snapchat-281722224.jpg" },
+            { month: "June", msg: "Long days with my favorite person.", img: "pics/Snapchat-582513103.jpg" },
+            { month: "July", msg: "Making magic under the stars.", img: "pics/Snapchat-1636730466.jpg" },
+            { month: "August", msg: "Adventures we'll never forget.", img: "pics/Snapchat-893275731.jpg" },
+            { month: "September", msg: "Falling for you every second.", img: "pics/sept.jpg" },
+            { month: "October", msg: "The best autumn is you.", img: "pics/oct.jpg" },
+            { month: "November", msg: "Thankful for our journey.", img: "pics/nov.jpg" },
+            { month: "December", msg: "Warmth in the coldest days.", img: "pics/dec.jpg" },
+            { month: "2026", msg: "Next year will be even better!", img: "pics/last.jpg", special: true }
+        ];
+
+        // --- Cursor & More Ambience ---
+        const cursor = document.getElementById('custom-cursor');
+        document.addEventListener('mousemove', (e) => {
+            gsap.to(cursor, { x: e.clientX, y: e.clientY, duration: 0.1 });
+            if(Math.random() > 0.75) createSparkle(e.clientX, e.clientY);
+        });
+        function createSparkle(x, y) {
+            const s = document.createElement('div');
+            s.className = 'cursor-trail';
+            const sz = Math.random() * 6 + 2;
+            s.style.width = s.style.height = `${sz}px`;
+            s.style.left = `${x}px`; s.style.top = `${y}px`;
+            document.body.appendChild(s);
+            gsap.to(s, { y: y + 40, opacity: 0, duration: 1.2, onComplete: () => s.remove() });
+        }
+        // More Hearts to Background
+        setInterval(() => {
+            const el = document.createElement('div');
+            const isHeart = Math.random() > 0.3; // More hearts than stars
+            el.style.position = 'fixed'; el.style.bottom = '-40px';
+            el.style.left = Math.random() * 100 + 'vw';
+            el.style.fontSize = Math.random() * 25 + 15 + 'px';
+            el.style.opacity = Math.random() * 0.5 + 0.1;
+            el.style.color = isHeart ? '#fda4af' : '#fef08a';
+            el.className = isHeart ? 'fas fa-heart heart-float' : 'fas fa-sparkle';
+            el.style.zIndex = '0';
+            document.body.appendChild(el);
+            gsap.to(el, { y: -(window.innerHeight + 150), x: `random(-120, 120)`, rotation: `random(-720, 720)`, duration: Math.random() * 15 + 10, ease: "none", onComplete: () => el.remove() });
+        }, 500); // Higher frequency spawn
+
+        // --- Sharper Wind Chime Animation ---
+        const chimeTop = document.querySelector('.chime-top');
+        for(let i=0; i<6; i++) {
+            const str = document.createElement('div');
+            str.className = 'chime-string';
+            const h = 60 + (i * 18);
+            str.style.height = `${h}px`; str.style.left = `${12 + (i * 16)}px`;
+            const tube = document.createElement('div');
+            tube.className = 'chime-tube';
+            tube.style.height = `${80 + Math.random() * 60}px`; tube.style.top = `${h}px`; tube.style.left = `-4px`;
+            const ht = document.createElement('div');
+            ht.className = 'chime-heart fas fa-heart';
+            ht.style.fontSize = `${14 + (i * 6)}px`; ht.style.top = `${parseInt(tube.style.height) + 25}px`;
+            str.appendChild(tube); tube.appendChild(ht); chimeTop.appendChild(str);
+            
+            // Sharper motion logic
+            gsap.to(str, { 
+                rotation: `random(-10, 10)`, 
+                duration: `random(1.5, 3)`, 
+                ease: "power2.inOut", 
+                repeat: -1, 
+                yoyo: true, 
+                delay: Math.random() * 2 
+            });
+        }
+
+        // --- Playlist & Minimization Logic ---
+        const audio = document.getElementById('bg-music');
+        const audioSrc = document.getElementById('audio-source');
+        const songList = document.getElementById('song-list');
+        const playBtn = document.getElementById('play-btn');
+        const playIcon = document.getElementById('play-icon');
+        const currentSongDisplay = document.getElementById('current-song-name');
+        const musicContainer = document.getElementById('music-container');
+        const minimizeBtn = document.getElementById('minimize-btn');
+        const toggleBtn = document.getElementById('music-toggle-btn');
+        const toggleIcon = document.getElementById('toggle-icon');
+        let currentTrack = 0;
+
+        function initMusic() {
+            playlist.forEach((track, i) => {
+                const btn = document.createElement('div');
+                btn.className = `song-item p-3 rounded-2xl text-[11px] font-typewriter flex items-center justify-between group hover:bg-rose-100 ${i===0?'active':''}`;
+                btn.innerHTML = `<span>${track.title}</span><i class="fas fa-play-circle opacity-0 group-hover:opacity-100"></i>`;
+                btn.onclick = () => playTrack(i);
+                songList.appendChild(btn);
+            });
+            audioSrc.src = playlist[0].url;
+            currentSongDisplay.innerText = playlist[0].title.split('-')[0].trim();
+            audio.load();
+        }
+
+        function playTrack(index) {
+            currentTrack = index;
+            audioSrc.src = playlist[index].url;
+            currentSongDisplay.innerText = playlist[index].title.split('-')[0].trim();
+            audio.load(); audio.play();
+            updateUI();
+        }
+
+        function updateUI() {
+            document.querySelectorAll('.song-item').forEach((it, i) => it.classList.toggle('active', i === currentTrack));
+            playIcon.className = audio.paused ? 'fas fa-play ml-1' : 'fas fa-pause';
+            toggleIcon.className = audio.paused ? 'fas fa-music' : 'fas fa-compact-disc animate-spin';
+        }
+
+        playBtn.onclick = () => { if(audio.paused) audio.play(); else audio.pause(); updateUI(); };
+        document.getElementById('next-btn').onclick = () => playTrack((currentTrack + 1) % playlist.length);
+        document.getElementById('prev-btn').onclick = () => playTrack((currentTrack - 1 + playlist.length) % playlist.length);
+        
+        minimizeBtn.onclick = () => musicContainer.classList.add('minimized');
+        toggleBtn.onclick = () => musicContainer.classList.remove('minimized');
+        
+        initMusic();
+
+        // --- Hero & Scrolls ---
+        const typeTxt = "Happy Birthday, My Butterfly!";
+        const target = document.getElementById('typewriter-text');
+        let ti = 0;
+        function type() {
+            if (ti < typeTxt.length) { target.innerHTML += typeTxt.charAt(ti++); setTimeout(type, 100); }
+            else { gsap.to(['#hero-sub', '#hero-date'], { opacity: 1, duration: 1.5, stagger: 0.6 }); }
+        }
+        setTimeout(type, 1000);
+
+        gsap.utils.toArray('.origin-card').forEach(c => {
+            gsap.to(c, { scrollTrigger: { trigger: c, start: "top 80%" }, opacity: 1, y: -30, duration: 1.2 });
+        });
+
+        // --- Gallery ---
+        const grid = document.getElementById('gallery-grid');
+        galleryImages.forEach((img, i) => {
+            const d = document.createElement('div');
+            d.className = 'opacity-0 gallery-item';
+            d.style.transform = `rotate(${Math.random() * 12 - 6}deg)`;
+            d.innerHTML = `
+                <div class="polaroid group w-full cursor-pointer relative" ondblclick="hLike(this)">
+                    <div class="aspect-[4/5] bg-gray-50 overflow-hidden relative">
+                        <img src="${img.url}" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700">
+                        <div class="like-overlay"><i class="fas fa-heart"></i></div>
+                    </div>
+                    <div class="mt-6 flex justify-between items-center font-handwriting text-4xl text-gray-700 px-2">
+                        <span>${img.caption}</span>
+                        <div class="flex gap-4">
+                            <button onclick="tLike(this, event)" class="text-rose-200 hover:text-rose-500"><i class="far fa-heart"></i></button>
+                            <button onclick="dlImg('${img.url}', event)" class="text-gray-200 hover:text-gray-500"><i class="fas fa-download text-lg"></i></button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            grid.appendChild(d);
+            gsap.to(d, { scrollTrigger: { trigger: d, start: "top 90%" }, opacity: 1, duration: 1, delay: i * 0.15 });
+        });
+
+        window.hLike = (el) => {
+            const o = el.querySelector('.like-overlay');
+            gsap.timeline().to(o, { scale: 1.6, opacity: 1, duration: 0.3, ease: "back.out(2)" }).to(o, { scale: 0, opacity: 0, duration: 0.3, delay: 0.4 });
+            el.querySelector('.fa-heart').classList.add('fas', 'text-rose-600');
+        };
+        window.tLike = (b, e) => { e.stopPropagation(); b.querySelector('i').classList.toggle('fas'); b.querySelector('i').classList.toggle('text-rose-600'); };
+        window.dlImg = (u, e) => {
+            e.stopPropagation(); const a = document.createElement('a'); a.href = u; a.download = 'Our_Memory.jpg'; a.target = '_blank';
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        };
+
+        // --- Refined Flipbook ---
+        const fb = document.getElementById('flipbook');
+        const rst = document.getElementById('reset-book');
+        calendarData.forEach((d, i) => {
+            const p = document.createElement('div');
+            p.className = 'page cursor-pointer'; p.style.zIndex = calendarData.length - i;
+            p.innerHTML = `
+                <h3 class="font-typewriter text-center text-[10px] uppercase tracking-[0.3em] text-rose-300 mb-6 border-b border-rose-50 pb-3">${d.month}</h3>
+                <div class="flex-1 rounded-3xl overflow-hidden border border-rose-50 shadow-inner mb-6 aspect-square">
+                    <img src="${d.img}" class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-1000">
+                </div>
+                <p class="font-handwriting text-center text-3xl text-rose-600 leading-tight px-2">${d.msg}</p>
+                <div class="mt-auto text-center text-[9px] text-gray-200 font-typewriter uppercase tracking-widest pt-6">Flip the page</div>
+            `;
+            p.onclick = () => {
+                if(p.classList.contains('flipped')) return;
+                p.classList.add('flipped');
+                // Sharper flip physics with slightly delayed z-index shift
+                setTimeout(() => { p.style.zIndex = i; }, 300);
+                if(i === calendarData.length - 2) gsap.to(rst, { opacity: 1, pointerEvents: 'all', y: -20 });
+            };
+            fb.appendChild(p);
+        });
+        rst.onclick = () => {
+            document.querySelectorAll('.page').forEach((p, i) => {
+                p.classList.remove('flipped');
+                setTimeout(() => { p.style.zIndex = calendarData.length - i; }, 400);
+            });
+            gsap.to(rst, { opacity: 0, pointerEvents: 'none', y: 0 });
+        };
+
+        // --- Final Typed Signature ---
+        const msg = "Meeting you was fate, becoming your friend was a choice, but falling in love with you was beyond my control. Every beat of my heart is for you. Happy Birthday, My World<3.";
+        ScrollTrigger.create({
+            trigger: "#closing-text", start: "top 75%",
+            onEnter: () => {
+                const el = document.getElementById('closing-text');
+                if(!el.innerText) {
+                    let k = 0; const int = setInterval(() => {
+                        el.innerHTML += msg.charAt(k++);
+                        if(k >= msg.length) { clearInterval(int); gsap.to('#signature-block', { opacity: 1, scale: 1, duration: 2.5, ease: "elastic.out(1, 0.5)" }); }
+                    }, 65);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
